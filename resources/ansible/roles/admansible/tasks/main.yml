@@ -1,0 +1,43 @@
+---
+- name: add user for ceph deploy
+  user:
+    name: admin
+    password: "admin"
+    comment: user for ansible ceph deploy
+    shell: /bin/bash
+  tags:
+    - usercephdeploy
+
+
+- name: create ssh directory
+  file:
+    path: /home/admin/.ssh
+    state: directory
+    owner: admin
+    group: admin
+    mode: 0700
+  tags:
+    - ansible_sshpub
+
+- name: copy ssh public key for all hosts
+  template:
+    src: auth.j2
+    dest: /home/admin/.ssh/authorized_keys
+    owner: admin
+    group: admin
+    mode: 0644
+  tags:
+    - ansible_sshpub
+
+
+- name: copy sudoers template for ceph
+  template:
+    src: sudo-ceph.j2
+    dest: /etc/sudoers.d/admin
+    owner: root
+    group: root
+    mode: 0440
+    validate: '/usr/sbin/visudo -cf %s'
+  tags:
+    - sudo_cephuser
+
